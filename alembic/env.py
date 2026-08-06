@@ -1,33 +1,29 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 import os
 import sys
 
-# Add the project root to the Python path
+# Add project root to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Import your SQLAlchemy Base and all models
-from database import Base
-from models import *
+# Import Base and all models
+from app.database import Base
+import app.models
 
-# Alembic Config object
 config = context.config
 
-# Configure Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# IMPORTANT: Tell Alembic about your models
+# Metadata for Alembic
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
+    """Run migrations in offline mode."""
 
     url = config.get_main_option("sqlalchemy.url")
 
@@ -35,6 +31,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        compare_type=True,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -43,10 +40,10 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
+    """Run migrations in online mode."""
 
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
