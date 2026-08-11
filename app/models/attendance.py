@@ -1,7 +1,15 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum as SQLEnum,
+    ForeignKey,
+    Integer,
+    Index,
+    func,
+)
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -16,7 +24,11 @@ class AttendanceStatus(str, Enum):
 class Attendance(Base):
     __tablename__ = "attendance"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
 
     enrollment_id = Column(
         Integer,
@@ -27,6 +39,7 @@ class Attendance(Base):
     date = Column(
         DateTime,
         default=datetime.utcnow,
+        nullable=False,
     )
 
     status = Column(
@@ -37,4 +50,13 @@ class Attendance(Base):
     enrollment = relationship(
         "Enrollment",
         back_populates="attendance_records",
+    )
+
+    __table_args__ = (
+        Index(
+            "uq_attendance_enrollment_day",
+            "enrollment_id",
+            func.date(date),
+            unique=True,
+        ),
     )

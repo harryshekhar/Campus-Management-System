@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: campus_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: harry8191
+      POSTGRES_DB: studentdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: campus_api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:harry8191@db:5432/studentdb
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
